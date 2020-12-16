@@ -50,6 +50,7 @@ public class UserService {
             u.setPhone(user.getPhone());
             u.setProfile(user.getProfile());
             u.setDocument(user.getDocument());
+            u.setPicture(user.getPicture());
 
             userRepository.save(u);
 

@@ -17,4 +17,5 @@ public class User {
     private String password;
     private String profile;
     private String document;
+    private String picture;
 }
