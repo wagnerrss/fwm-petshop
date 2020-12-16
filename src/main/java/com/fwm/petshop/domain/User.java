@@ -2,12 +2,10 @@ package com.fwm.petshop.domain;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
+@Table(name = "system_user")
 @Data
 public class User {
     @Id
