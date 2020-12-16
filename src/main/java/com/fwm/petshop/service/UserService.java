@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -67,6 +68,12 @@ public class UserService {
         }
 
         return false;
+    }
+
+    public User findUser(Map login){
+        User u = userRepository.findByEmailPassword(login.get("email").toString(), login.get("password").toString());
+
+        return u;
     }
 
 }

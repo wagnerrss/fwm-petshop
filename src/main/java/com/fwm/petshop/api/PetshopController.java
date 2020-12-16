@@ -6,8 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import sun.awt.image.ImageWatched;
 
 import java.net.URI;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -90,6 +93,30 @@ public class PetshopController {
                 ResponseEntity.notFound().build();
     }
 
+//*****************************************
+//    Login
+//*****************************************
+    @GetMapping("/login")
+    public ResponseEntity getLogin(@RequestBody Map login) {
+        Map ret = new LinkedHashMap();
+
+        try {
+            User u = userService.findUser(login);
+
+            if ((u == null) || (u.getId() <= 0)) {
+                ret.put("status", 400);
+                ret.put("mensagem", "Usuário não encontrado!");
+
+                return ResponseEntity.badRequest().body(ret);
+            }
+            return ResponseEntity.ok(u);
+        } catch (Exception ex) {
+            ret.put("status", 400);
+            ret.put("mensagem", "Usuário não encontrado!");
+
+            return ResponseEntity.badRequest().body(ret);
+        }
+    }
 
 
 }
