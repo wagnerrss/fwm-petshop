@@ -45,34 +45,34 @@ public class PetshopController {
         return ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri();
     }
 
-    private Map mapErro(String tipo) {
+    private Map mapErro(String tipo, String mensagem) {
         switch (tipo) {
             case "GET":
                 return new LinkedHashMap<String, Object>() {
                     {
                         put("status", 404);
-                        put("mensagem", "Registro não encontrado!");
+                        put("mensagem", mensagem.trim().equals("") ? "Registro não encontrado!" : mensagem);
                     }
                 };
             case "POST":
                 return new LinkedHashMap<String, Object>() {
                     {
                         put("status", 400);
-                        put("mensagem", "Não foi possível inserir o registro!");
+                        put("mensagem", mensagem.trim().equals("") ? "Não foi possível inserir o registro!" : mensagem);
                     }
                 };
             case "PUT":
                 return new LinkedHashMap<String, Object>() {
                     {
                         put("status", 400);
-                        put("mensagem", "Não foi possível atualizar o registro!");
+                        put("mensagem", mensagem.trim().equals("") ? "Não foi possível atualizar o registro!" : mensagem);
                     }
                 };
             case "DELETE":
                 return new LinkedHashMap<String, Object>() {
                     {
                         put("status", 400);
-                        put("mensagem", "Não foi possível excluir o registro!");
+                        put("mensagem", mensagem.trim().equals("") ? "Não foi possível excluir o registro!" : mensagem);
                     }
                 };
         }
@@ -95,7 +95,7 @@ public class PetshopController {
 
         return product.isPresent() ?
                 ResponseEntity.ok(product.get()) :
-                new ResponseEntity<>(mapErro("GET"), HttpStatus.BAD_REQUEST);
+                new ResponseEntity<>(mapErro("GET", ""), HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("/user")
@@ -106,19 +106,22 @@ public class PetshopController {
             URI location = getUri(p.getId());
             return ResponseEntity.created(location).build();
         } catch (Exception ex) {
-            return new ResponseEntity<>(mapErro("POST"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(mapErro("POST", ex.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PutMapping("/user/{id}")
     public ResponseEntity putUser(@PathVariable("id") Integer id, @RequestBody User user) {
-        user.setId(id);
-        User p = userService.update(id, user);
+        try {
+            user.setId(id);
+            User p = userService.update(id, user);
 
-        return p != null ?
-                ResponseEntity.ok(p) :
-                new ResponseEntity<>(mapErro("PUT"), HttpStatus.BAD_REQUEST);
-
+            return p != null ?
+                    ResponseEntity.ok(p) :
+                    new ResponseEntity<>(mapErro("PUT", ""), HttpStatus.BAD_REQUEST);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(mapErro("PUT", ex.getMessage()), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @DeleteMapping("/user/{id}")
@@ -127,7 +130,7 @@ public class PetshopController {
 
         return ok ?
                 ResponseEntity.ok().build() :
-                new ResponseEntity<>(mapErro("DELETE"), HttpStatus.BAD_REQUEST);
+                new ResponseEntity<>(mapErro("DELETE", ""), HttpStatus.BAD_REQUEST);
     }
 
     //*****************************************
@@ -140,12 +143,12 @@ public class PetshopController {
 
             if ((u == null) || (u.getId() <= 0)) {
 
-                return new ResponseEntity<>(mapErro("GET"), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(mapErro("GET", ""), HttpStatus.NOT_FOUND);
             }
 
             return ResponseEntity.ok(u);
         } catch (Exception ex) {
-            return new ResponseEntity<>(mapErro("GET"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(mapErro("GET", ex.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
