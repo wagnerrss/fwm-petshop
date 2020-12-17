@@ -3,6 +3,7 @@ package com.fwm.petshop.api;
 import com.fwm.petshop.domain.User;
 import com.fwm.petshop.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -21,27 +22,62 @@ public class PetshopController {
     private UserService userService;
 
     @GetMapping
-    public String get(){
+    public String get() {
         return "Get api FWM para PetShop";
     }
 
     @PostMapping
-    public String post(){
+    public String post() {
         return "Post api FWM para PetShop";
     }
 
     @PutMapping
-    public String put(){
+    public String put() {
         return "Put api FWM para PetShop";
     }
 
     @DeleteMapping
-    public String delete(){
+    public String delete() {
         return "Delete api FWM para PetShop";
     }
 
     private URI getUri(Integer id) {
         return ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(id).toUri();
+    }
+
+    private Map mapErro(String tipo) {
+        switch (tipo) {
+            case "GET":
+                return new LinkedHashMap<String, Object>() {
+                    {
+                        put("status", 404);
+                        put("mensagem", "Registro não encontrado!");
+                    }
+                };
+            case "POST":
+                return new LinkedHashMap<String, Object>() {
+                    {
+                        put("status", 400);
+                        put("mensagem", "Não foi possível inserir o registro!");
+                    }
+                };
+            case "PUT":
+                return new LinkedHashMap<String, Object>() {
+                    {
+                        put("status", 400);
+                        put("mensagem", "Não foi possível atualizar o registro!");
+                    }
+                };
+            case "DELETE":
+                return new LinkedHashMap<String, Object>() {
+                    {
+                        put("status", 400);
+                        put("mensagem", "Não foi possível excluir o registro!");
+                    }
+                };
+        }
+
+        return new LinkedHashMap();
     }
 
 //*****************************************
@@ -59,7 +95,7 @@ public class PetshopController {
 
         return product.isPresent() ?
                 ResponseEntity.ok(product.get()) :
-                ResponseEntity.notFound().build();
+                new ResponseEntity<>(mapErro("GET"), HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("/user")
@@ -70,7 +106,7 @@ public class PetshopController {
             URI location = getUri(p.getId());
             return ResponseEntity.created(location).build();
         } catch (Exception ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
+            return new ResponseEntity<>(mapErro("POST"), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -81,7 +117,8 @@ public class PetshopController {
 
         return p != null ?
                 ResponseEntity.ok(p) :
-                ResponseEntity.notFound().build();
+                new ResponseEntity<>(mapErro("PUT"), HttpStatus.BAD_REQUEST);
+
     }
 
     @DeleteMapping("/user/{id}")
@@ -90,31 +127,25 @@ public class PetshopController {
 
         return ok ?
                 ResponseEntity.ok().build() :
-                ResponseEntity.notFound().build();
+                new ResponseEntity<>(mapErro("DELETE"), HttpStatus.BAD_REQUEST);
     }
 
-//*****************************************
+    //*****************************************
 //    Login
 //*****************************************
     @GetMapping("/login")
     public ResponseEntity getLogin(@RequestBody Map login) {
-        Map ret = new LinkedHashMap();
-
         try {
             User u = userService.findUser(login);
 
             if ((u == null) || (u.getId() <= 0)) {
-                ret.put("status", 400);
-                ret.put("mensagem", "Usuário não encontrado!");
 
-                return ResponseEntity.badRequest().body(ret);
+                return new ResponseEntity<>(mapErro("GET"), HttpStatus.NOT_FOUND);
             }
+
             return ResponseEntity.ok(u);
         } catch (Exception ex) {
-            ret.put("status", 400);
-            ret.put("mensagem", "Usuário não encontrado!");
-
-            return ResponseEntity.badRequest().body(ret);
+            return new ResponseEntity<>(mapErro("GET"), HttpStatus.BAD_REQUEST);
         }
     }
 
