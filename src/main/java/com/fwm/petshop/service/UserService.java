@@ -26,6 +26,10 @@ public class UserService {
         return userRepository.findByName(name);
     }
 
+    public Optional<User> getByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     public User insert(User user) {
         if ((user.getId() == null) || (user.getId() <= 0)) {
             Optional<User> optional = getByUserName(user.getName());
@@ -43,6 +47,14 @@ public class UserService {
         Assert.notNull(id, "Não foi possível atualizar o registro");
 
         Optional<User> optional = getById(id);
+
+        if (!optional.get().getEmail().equals(user.getEmail())){
+            Optional<User> optionalEmail = getByEmail(user.getEmail());
+            if (optionalEmail.isPresent()) {
+                throw new RuntimeException("Não foi possível atualizar o registro, Email já existe");
+            }
+        }
+
         if (optional.isPresent()) {
             User u = optional.get();
             u.setName(user.getName());

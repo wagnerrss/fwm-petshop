@@ -14,4 +14,5 @@ public interface UserRepository extends CrudRepository<User, Integer> {
     public User findByEmailPassword(@Param("EMAIL") String EMAIL,
                                     @Param("PASSWORD") String PASSWORD);
 
+    Optional<User> findByEmail(String email);
 }
